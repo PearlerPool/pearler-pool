@@ -172,4 +172,27 @@
     for(var i=0;i<bubs.length;i++){var b=bubs[i];b.y-=b.s;b.x+=Math.sin(b.y*.02+b.w)*.3;if(b.y<-10){b.y=uc.height+10;b.x=Math.random()*uc.width;}
       ux.beginPath();ux.arc(b.x,b.y,b.r,0,6.28);ux.strokeStyle='rgba(191,227,255,.16)';ux.lineWidth=1;ux.stroke();}}
   bub();
-  var form=document.getElementById('waitlist'),msg=document.getEle
+  var form=document.getElementById('waitlist'),msg=document.getElementById('msg'),btn=form.querySelector('button');
+  function showThanks(){
+    if(document.getElementById('thanks-overlay'))return;
+    var ov=document.createElement('div');
+    ov.id='thanks-overlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(4,6,11,.8);opacity:0;transition:opacity .35s';
+    var card=document.createElement('div');
+    card.style.cssText='text-align:center;border:1px solid rgba(233,230,221,.16);background:rgba(7,9,14,.96);padding:46px 40px;max-width:430px;transform:translateY(10px);transition:transform .35s';
+    card.innerHTML='<div style="width:46px;height:46px;border-radius:50%;margin:0 auto 22px;background:radial-gradient(circle at 35% 30%,#fffaf0,#c9a84c);box-shadow:0 0 26px rgba(201,168,76,.55)"></div><div style="font-size:22px;letter-spacing:.3px;color:#e9e6dd;margin-bottom:12px">Thank You for Registering</div><div style="font-size:13px;line-height:1.8;color:#727884">You’re on the list, Pearler. Watch your inbox — and come hunt with us on <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener" style="color:#00d4ff;text-decoration:none;border-bottom:1px solid rgba(0,212,255,.4)">Discord</a>.</div><button id="thanks-close" style="margin-top:26px;font-family:inherit;font-size:11px;letter-spacing:2px;color:#e9e6dd;background:transparent;border:1px solid rgba(233,230,221,.2);padding:10px 22px;cursor:pointer">CLOSE</button>';
+    ov.appendChild(card);document.body.appendChild(ov);
+    requestAnimationFrame(function(){ov.style.opacity='1';card.style.transform='translateY(0)';});
+    function close(){ov.style.opacity='0';setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov);},350);}
+    ov.addEventListener('click',function(e){if(e.target===ov)close();});
+    card.querySelector('#thanks-close').onclick=close;
+  }
+  form.addEventListener('submit',function(ev){ev.preventDefault();var email=document.getElementById('email').value.trim();if(!email)return;btn.disabled=true;
+    fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'landing'})})
+      .then(function(r){if(!r.ok)throw 0;msg.style.color='#c9a84c';msg.textContent='> YOU ARE ON THE LIST. WELCOME, PEARLER.';msg.classList.add('show');form.reset();showThanks();})
+      .catch(function(){msg.style.color='#d98a6a';msg.textContent='> SOMETHING WENT WRONG. PLEASE TRY AGAIN.';msg.classList.add('show');})
+      .finally(function(){btn.disabled=false;});});
+})();
+</script>
+</body>
+</html>
